@@ -28,7 +28,7 @@ N    <- read_csv(here("TheHagueNeighborhoods.csv"))
 BXN <- cross_join(B,N) |>
   mutate(
     # Create dependent variable: was neighborhood target or not?
-    CHOSEN = as.numeric(BXN$NHOODBUR==BXN$NHOODID),
+    CHOSEN = as.numeric(NHOODBUR==NHOODID),
     # new variable: distance home - potential target
     DIST   = sqrt((XRESID-X)^2 + (YRESID-Y)^2) / 1000,
     # Correction: Distance within the same neighborhood
@@ -162,3 +162,36 @@ Model_ISFA_clogit <-
          PROXCITY + RESUNITS + strata(CASE) + offset(loginvp), 
          data=BXN_ISFA)
 summary(Model_ISFA_clogit)
+
+
+
+# Extra: Conditional logit and Poisson regression equivalance ------------------
+# Estimate a conditional logit model without PROXIMITY variable. This implies 
+#   all active variables only vary across neighborhoods, not across offences.
+alt_model_clogit <- 
+  clogit(CHOSEN ~ PROPVAL + SINGFAM + RESMOBIL + ETNHETERO +
+           PROXCITY + RESUNITS + strata(CASE),
+         data=BXN, method="exact")
+
+# Aggregate crimes across neighborhoods
+aggregated_BXN <-
+  BXN |>
+  # The next two lines calculate # of crimes per neighborhood,
+  #   but they do not aggregate
+  group_by(NHOODID) |>
+  mutate(BURGLARY_COUNT = sum(CHOSEN)) |>
+  # The next line aggregates because all relevant variables are
+  #   constants within neighborhood
+  filter(row_number() == 1) 
+
+# Estimate a Poisson model on the aggregated data
+alt_model_poisson <-
+  glm(BURGLARY_COUNT ~  PROPVAL + SINGFAM + RESMOBIL + ETNHETERO +
+        PROXCITY + RESUNITS, 
+      family = "poisson", data = aggregated_BXN) 
+
+# Compare results
+tidy(alt_model_clogit)
+tidy(alt_model_poisson)
+
+
