@@ -59,19 +59,12 @@ summary(Model1a_clogit)
 # You cannot (yet) use tidy to obtain robust estimates in a tibble
 tidy(Model1a_clogit, exponentiate=TRUE)
 
-
+# Create data frame for use with mlogit
+#  (the mlogit.data function is deprecated, better use dfidx now)
 BXN_mlogit <- 
   BXN |>
   dfidx(idx = c("CASE", "NHOODID"))
 
-
-# # Create data frame for use with mlogit
-# BXN.mldata <- mlogit.data(data=BXN, 
-#                           shape="long",
-#                           choice = "CHOSEN", 
-#                           alt.var="NHOODID", 
-#                           chid.var="CASE",
-#                           id.var="PERSONID")
 # estimate conditional logit model
 Model1_mlogit <-
   mlogit(formula = CHOSEN~PROPVAL+SINGFAM+RESMOBIL+
@@ -90,12 +83,11 @@ BXN <-
          PR_MINOR   = PROXIMITY * B_MINOR,
          PR_ADULT   = PROXIMITY * B_ADULT
          )
-
-
 Model2_clogit<-clogit(CHOSEN~PROPVAL+SINGFAM+RESMOBIL+PROXCITY+RESUNITS+
                         PR_ADULT+PR_MINOR+EH_NATIVE+EH_FOREIGN+strata(CASE),
                       data=BXN)
 summary(Model2_clogit)
+tidy(Model2_clogit)
 
 # test coefficient equality
 linearHypothesis(Model2_clogit, "EH_NATIVE = EH_FOREIGN")
@@ -128,6 +120,7 @@ BXN_SFA
 Model_SFA_clogit <- clogit(CHOSEN~PROPVAL+SINGFAM+RESMOBIL+ETNHETERO+PROXIMITY+
                             PROXCITY+RESUNITS+strata(CASE),data=BXN_SFA, method="exact")
 summary(Model_SFA_clogit)
+tidy(Model_SFA_clogit)
 
 
 # # Importance sampling from alternatives
@@ -162,7 +155,7 @@ Model_ISFA_clogit <-
          PROXCITY + RESUNITS + strata(CASE) + offset(loginvp), 
          data=BXN_ISFA)
 summary(Model_ISFA_clogit)
-
+tidy(Model_ISFA_clogit)
 
 
 # Extra: Conditional logit and Poisson regression equivalance ------------------
@@ -194,4 +187,24 @@ alt_model_poisson <-
 tidy(alt_model_clogit)
 tidy(alt_model_poisson)
 
+# Nested logit ------------------------------------------------------------
+# (just for the example, we create 'districts', which are sets of
+#     multiple neighborhoods)
+BXN_NESTED <-
+  BXN |>
+  mutate(DISTRICT = trunc(NHOODID / 1000),
+         # to prevent 5184 from being a single-nhood district, it is
+         #   merged with district 5183
+         DISTRICT = if_else(DISTRICT == 5184, 5183, DISTRICT)) |>
+  # Note the nesting structure in the second argument
+  dfidx(idx = list("CASE", c("NHOODID", "DISTRICT"))) 
+
+# Estimeate nested logit model
+Model_nested_logit <- 
+  mlogit(formula = CHOSEN ~ PROPVAL + SINGFAM + RESMOBIL +
+         ETNHETERO + PROXIMITY + PROXCITY + RESUNITS | 0,
+       data=BXN_NESTED, nests = TRUE) 
+
+tidy(Model_nested_logit )
+  
 
