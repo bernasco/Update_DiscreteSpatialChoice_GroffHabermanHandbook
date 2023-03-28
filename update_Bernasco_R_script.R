@@ -3,7 +3,7 @@
 # Wim Bernasco, 2023
 ##################################################
 library(tidyverse) # new
-library(broom)
+library(broom)     # proces model output in tibbles  
 
 library(survival)  # clogit() function
 library(mlogit)    # mlogit() function
@@ -48,7 +48,7 @@ summary(Model1_clogit)
 glance(Model1_clogit)
 # Coeffcient table with estimate, standard error, statistic, and p-value
 tidy(Model1_clogit)
-# Same with estimate replace with exp(estimate) 
+# Same with estimate replaced with exp(estimate) 
 tidy(Model1_clogit, exponentiate=TRUE)
 
 # robust SE estimates
@@ -149,7 +149,7 @@ BXN_ISFA <-
 # show result 
 BXN_ISFA 
 
-#  The offset corrects the estimates)
+#  The offset corrects the estimates
 Model_ISFA_clogit <-
   clogit(CHOSEN ~ PROPVAL + SINGFAM + RESMOBIL + ETNHETERO + PROXIMITY +
          PROXCITY + RESUNITS + strata(CASE) + offset(loginvp), 
@@ -158,7 +158,7 @@ summary(Model_ISFA_clogit)
 tidy(Model_ISFA_clogit)
 
 
-# Extra: Conditional logit and Poisson regression equivalance ------------------
+# Extra: Conditional logit and Poisson regression equivalence ------------------
 # Estimate a conditional logit model without PROXIMITY variable. This implies 
 #   all active variables only vary across neighborhoods, not across offences.
 alt_model_clogit <- 
@@ -188,7 +188,7 @@ tidy(alt_model_clogit)
 tidy(alt_model_poisson)
 
 # Nested logit ------------------------------------------------------------
-# (just for the example, we create 'districts', which are sets of
+# (just for this example, we create 'districts', which are sets of
 #     multiple neighborhoods)
 BXN_NESTED <-
   BXN |>
