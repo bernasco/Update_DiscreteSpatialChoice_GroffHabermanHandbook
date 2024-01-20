@@ -101,6 +101,12 @@ summary(Mixedlogit1_mlogit)
 
 #--------------------------------------------------------------------
 # Random sampling from alternatives
+
+# For the estimation results to be reproducible, the random number
+#   generator (RNG) needs to be set. The function 'sample' uses the RNG.
+#   Credits to Stijn Ruiter, who suggested adding set.seed for reproducibility.
+set.seed(123456789)
+
 BXN_SFA <- 
   bind_rows(
     # first select all non-chosen rows
@@ -123,6 +129,12 @@ tidy(Model_SFA_clogit)
 
 # # Importance sampling from alternatives
 # # subset of 'important' alternatives + chosen
+
+# For the estimation results to be reproducible, the random number
+#   generator (RNG) needs to be set. The function 'sample' uses the RNG.
+#   Credits to Stijn Ruiter, who suggested adding set.seed for reproducibility.
+set.seed(123456789)
+
 
 BXN_ISFA <- 
   bind_rows(
