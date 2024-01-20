@@ -2,15 +2,13 @@
 # Crime Location Choice Models (update March 2023)
 # Wim Bernasco, 2023
 ##################################################
-library(tidyverse) # new
-library(broom)     # proces model output in tibbles  
+library(tidyverse) # data manipulation (e.g. dplyr, readr)
+library(broom)     # process model output in tibbles  
 
 library(survival)  # clogit() function
 library(mlogit)    # mlogit() function
 library(car)       # linearHypothesis() function for coefficient tests
 library(here)      # file localization 
-
-
 
 ####################################################
 # The Public Domain (CrimeStat) version of the 
